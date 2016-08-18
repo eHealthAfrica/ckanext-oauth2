@@ -32,16 +32,14 @@ log = logging.getLogger(__name__)
 
 class OAuth2Controller(base.BaseController):
 
-    def __init__(self):
-        self.oauth2helper = oauth2.OAuth2Helper()
-
     def callback(self):
         try:
-            token = self.oauth2helper.get_token()
-            user_name = self.oauth2helper.identify(token)
-            self.oauth2helper.remember(user_name)
-            self.oauth2helper.update_token(user_name, token)
-            self.oauth2helper.redirect_from_callback()
+            oauth2helper = oauth2.OAuth2Helper()
+            token = oauth2helper.get_token()
+            user_name = oauth2helper.identify(token)
+            oauth2helper.remember(user_name)
+            oauth2helper.update_token(user_name, token)
+            oauth2helper.redirect_from_callback()
         except Exception as e:
 
             # If the callback is called with an error, we must show the message
