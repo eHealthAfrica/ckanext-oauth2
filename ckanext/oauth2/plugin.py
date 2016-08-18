@@ -100,7 +100,7 @@ class OAuth2Plugin(plugins.SingletonPlugin):
     def identify(self):
         log.debug('identify')
 
-        oauth2helper = oauth2.0OAuth2Helper()
+        oauth2helper = oauth2.OAuth2Helper()
 
         authorization_header = config.get('ckanext.oauth2.authorization_header', 'Authorization')
 
@@ -160,7 +160,7 @@ class OAuth2Plugin(plugins.SingletonPlugin):
     def login(self):
         log.debug('login')
 
-        oauth2helper = oauth2.0OAuth2Helper()
+        oauth2helper = oauth2.OAuth2Helper()
 
         # Log in attemps are fired when the user is not logged in and they click
         # on the log in button
