@@ -78,8 +78,6 @@ class OAuth2Plugin(plugins.SingletonPlugin):
         self.edit_url = config.get('ckan.oauth2.edit_url', None)
         self.authorization_header = config.get('ckan.oauth2.authorization_header', 'Authorization')
 
-        self.oauth2helper = oauth2.OAuth2Helper()
-
     def before_map(self, m):
         log.debug('Setting up the redirections to the OAuth2 service')
 
@@ -231,3 +229,5 @@ class OAuth2Plugin(plugins.SingletonPlugin):
             'ckan.oauth2.profile_api_groupmembership_field',
             'ckan.oauth2.sysadmin_group_name'
         )
+
+        self.oauth2helper = oauth2.OAuth2Helper()
