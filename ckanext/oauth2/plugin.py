@@ -210,3 +210,24 @@ class OAuth2Plugin(plugins.SingletonPlugin):
         # Add this plugin's templates dir to CKAN's extra_template_paths, so
         # that CKAN will use this plugin's custom templates.
         plugins.toolkit.add_template_directory(config, 'templates')
+
+    # IConfigurable
+
+    def configure(self, config):
+        # Certain config options must exists for the plugin to work. Raise an
+        # exception if they're missing.
+        missing_config = "{0} is not configured. Please amend your .ini file."
+        config_options = (
+            'ckan.oauth2.authorization_endpoint',
+            'ckan.oauth2.token_endpoint',
+            'ckan.oauth2.profile_api_url',
+            'ckan.oauth2.client_id',
+            'ckan.oauth2.client_secret',
+            'ckan.oauth2.scope',
+            'ckan.oauth2.rememberer_name',
+            'ckan.oauth2.profile_api_user_field',
+            'ckan.oauth2.profile_api_fullname_field',
+            'ckan.oauth2.profile_api_mail_field',
+            'ckan.oauth2.profile_api_groupmembership_field',
+            'ckan.oauth2.sysadmin_group_name'
+        )
