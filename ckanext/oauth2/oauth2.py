@@ -69,7 +69,7 @@ class OAuth2Helper(object):
                              'profile_api_url and profile_api_user_field are required')
 
     def _redirect_uri(self, request):
-        return ''.join([request.host_url, constants.REDIRECT_URL])
+        return ''.join([config.get('ckan.site_url'), constants.REDIRECT_URL])
 
     def challenge(self, came_from_url):
         # This function is called by the log in function when the user is not logged in
