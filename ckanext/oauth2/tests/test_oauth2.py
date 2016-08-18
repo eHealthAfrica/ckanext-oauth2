@@ -89,12 +89,12 @@ class OAuth2PluginTest(unittest.TestCase):
         oauth2.db = MagicMock()
 
         oauth2.config = {
-            'ckan.oauth2.authorization_endpoint': 'https://test/oauth2/authorize/',
-            'ckan.oauth2.token_endpoint': 'https://test/oauth2/token/',
-            'ckan.oauth2.client_id': 'client-id',
-            'ckan.oauth2.client_secret': 'client-secret',
-            'ckan.oauth2.profile_api_url': self._profile_api_url,
-            'ckan.oauth2.profile_api_user_field': self._user_field
+            'ckanext.oauth2.authorization_endpoint': 'https://test/oauth2/authorize/',
+            'ckanext.oauth2.token_endpoint': 'https://test/oauth2/token/',
+            'ckanext.oauth2.client_id': 'client-id',
+            'ckanext.oauth2.client_secret': 'client-secret',
+            'ckanext.oauth2.profile_api_url': self._profile_api_url,
+            'ckanext.oauth2.profile_api_user_field': self._user_field
         }
 
         helper = OAuth2Helper()

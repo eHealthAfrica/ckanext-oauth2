@@ -46,18 +46,18 @@ class OAuth2Helper(object):
 
     def __init__(self):
 
-        self.authorization_endpoint = config.get('ckan.oauth2.authorization_endpoint', None)
-        self.token_endpoint = config.get('ckan.oauth2.token_endpoint', None)
-        self.profile_api_url = config.get('ckan.oauth2.profile_api_url', None)
-        self.client_id = config.get('ckan.oauth2.client_id', None)
-        self.client_secret = config.get('ckan.oauth2.client_secret', None)
-        self.scope = config.get('ckan.oauth2.scope', '').decode()
-        self.rememberer_name = config.get('ckan.oauth2.rememberer_name', None)
-        self.profile_api_user_field = config.get('ckan.oauth2.profile_api_user_field', None)
-        self.profile_api_fullname_field = config.get('ckan.oauth2.profile_api_fullname_field', None)
-        self.profile_api_mail_field = config.get('ckan.oauth2.profile_api_mail_field', None)
-        self.profile_api_groupmembership_field = config.get('ckan.oauth2.profile_api_groupmembership_field', None)
-        self.sysadmin_group_name = config.get('ckan.oauth2.sysadmin_group_name', None)
+        self.authorization_endpoint = config.get('ckanext.oauth2.authorization_endpoint', None)
+        self.token_endpoint = config.get('ckanext.oauth2.token_endpoint', None)
+        self.profile_api_url = config.get('ckanext.oauth2.profile_api_url', None)
+        self.client_id = config.get('ckanext.oauth2.client_id', None)
+        self.client_secret = config.get('ckanext.oauth2.client_secret', None)
+        self.scope = config.get('ckanext.oauth2.scope', '').decode()
+        self.rememberer_name = config.get('ckanext.oauth2.rememberer_name', None)
+        self.profile_api_user_field = config.get('ckanext.oauth2.profile_api_user_field', None)
+        self.profile_api_fullname_field = config.get('ckanext.oauth2.profile_api_fullname_field', None)
+        self.profile_api_mail_field = config.get('ckanext.oauth2.profile_api_mail_field', None)
+        self.profile_api_groupmembership_field = config.get('ckanext.oauth2.profile_api_groupmembership_field', None)
+        self.sysadmin_group_name = config.get('ckanext.oauth2.sysadmin_group_name', None)
 
 
         # Init db

@@ -70,19 +70,12 @@ class OAuth2Plugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.IConfigurable)
 
-    def __init__(self, name=None):
-        '''Store the OAuth 2 client configuration'''
-        log.debug('Init OAuth2 extension')
-
-        self.register_url = config.get('ckan.oauth2.register_url', None)
-        self.reset_url = config.get('ckan.oauth2.reset_url', None)
-        self.edit_url = config.get('ckan.oauth2.edit_url', None)
-        self.authorization_header = config.get('ckan.oauth2.authorization_header', 'Authorization')
-
-        self.oauth2helper = oauth2.OAuth2Helper()
-
     def before_map(self, m):
         log.debug('Setting up the redirections to the OAuth2 service')
+
+        register_url = config.get('ckanext.oauth2.register_url', None)
+        reset_url = config.get('ckanext.oauth2.reset_url', None)
+        edit_url = config.get('ckanext.oauth2.edit_url', None)
 
         # We need to handle petitions received to the Callback URL
         # since some error can arise and we need to process them
@@ -91,39 +84,43 @@ class OAuth2Plugin(plugins.SingletonPlugin):
                   action='callback')
 
         # # Redirect the user to the OAuth service register page
-        if self.register_url:
-            m.redirect('/user/register', self.register_url)
+        if register_url:
+            m.redirect('/user/register', register_url)
 
         # Redirect the user to the OAuth service reset page
-        if self.reset_url:
-            m.redirect('/user/reset', self.reset_url)
+        if reset_url:
+            m.redirect('/user/reset', reset_url)
 
         # Redirect the user to the OAuth service reset page
-        if self.edit_url:
-            m.redirect('/user/edit/{user}', self.edit_url)
+        if edit_url:
+            m.redirect('/user/edit/{user}', edit_url)
 
         return m
 
     def identify(self):
         log.debug('identify')
 
+        oauth2helper = oauth2.0OAuth2Helper()
+
+        authorization_header = config.get('ckanext.oauth2.authorization_header', 'Authorization')
+
         # Create session if it does not exist. Workaround to show flash messages
         session.save()
 
         def _refresh_and_save_token(user_name):
-            new_token = self.oauth2helper.refresh_token(user_name)
+            new_token = oauth2helper.refresh_token(user_name)
             if new_token:
                 toolkit.c.usertoken = new_token
 
         environ = toolkit.request.environ
-        apikey = toolkit.request.headers.get(self.authorization_header, '')
+        apikey = toolkit.request.headers.get(authorization_header, '')
         user_name = None
 
         # This API Key is not the one of CKAN, it's the one provided by the OAuth2 Service
         if apikey:
             try:
                 token = {'access_token': apikey}
-                user_name = self.oauth2helper.identify(token)
+                user_name = oauth2helper.identify(token)
             except Exception:
                 pass
 
@@ -135,7 +132,7 @@ class OAuth2Plugin(plugins.SingletonPlugin):
         # If we have been able to log in the user (via API or Session)
         if user_name:
             toolkit.c.user = user_name
-            toolkit.c.usertoken = self.oauth2helper.get_stored_token(user_name)
+            toolkit.c.usertoken = oauth2helper.get_stored_token(user_name)
             toolkit.c.usertoken_refresh = partial(_refresh_and_save_token, user_name)
         else:
             log.warn('The user is not currently logged...')
@@ -163,6 +160,8 @@ class OAuth2Plugin(plugins.SingletonPlugin):
     def login(self):
         log.debug('login')
 
+        oauth2helper = oauth2.0OAuth2Helper()
+
         # Log in attemps are fired when the user is not logged in and they click
         # on the log in button
 
@@ -171,7 +170,7 @@ class OAuth2Plugin(plugins.SingletonPlugin):
         # the system cannot get the previous page
         came_from_url = self._get_previous_page(constants.INITIAL_PAGE)
 
-        self.oauth2helper.challenge(came_from_url)
+        oauth2helper.challenge(came_from_url)
 
     def abort(self, status_code, detail, headers, comment):
         log.debug('abort')
@@ -219,16 +218,16 @@ class OAuth2Plugin(plugins.SingletonPlugin):
         # exception if they're missing.
         missing_config = "{0} is not configured. Please amend your .ini file."
         config_options = (
-            'ckan.oauth2.authorization_endpoint',
-            'ckan.oauth2.token_endpoint',
-            'ckan.oauth2.profile_api_url',
-            'ckan.oauth2.client_id',
-            'ckan.oauth2.client_secret',
-            'ckan.oauth2.scope',
-            'ckan.oauth2.rememberer_name',
-            'ckan.oauth2.profile_api_user_field',
-            'ckan.oauth2.profile_api_fullname_field',
-            'ckan.oauth2.profile_api_mail_field',
-            'ckan.oauth2.profile_api_groupmembership_field',
-            'ckan.oauth2.sysadmin_group_name'
+            'ckanext.oauth2.authorization_endpoint',
+            'ckanext.oauth2.token_endpoint',
+            'ckanext.oauth2.profile_api_url',
+            'ckanext.oauth2.client_id',
+            'ckanext.oauth2.client_secret',
+            'ckanext.oauth2.scope',
+            'ckanext.oauth2.rememberer_name',
+            'ckanext.oauth2.profile_api_user_field',
+            'ckanext.oauth2.profile_api_fullname_field',
+            'ckanext.oauth2.profile_api_mail_field',
+            'ckanext.oauth2.profile_api_groupmembership_field',
+            'ckanext.oauth2.sysadmin_group_name'
         )
