@@ -159,7 +159,7 @@ class OAuth2Helper(object):
         if user_token:
             return {
                 'access_token': user_token.access_token,
-                'refresh_token': user_token.refresh_token,
+                'expires_at': user_token.expires_at,
                 'expires_in': user_token.expires_in,
                 'token_type': user_token.token_type
             }
@@ -173,7 +173,7 @@ class OAuth2Helper(object):
         # Save the new token
         user_token.access_token = token['access_token']
         user_token.token_type = token['token_type']
-        user_token.refresh_token = token['refresh_token']
+        user_token.expires_at = token['expires_at']
         user_token.expires_in = token['expires_in']
         model.Session.add(user_token)
         model.Session.commit()

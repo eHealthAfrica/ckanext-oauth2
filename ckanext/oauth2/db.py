@@ -39,7 +39,7 @@ def init_db(model):
             sa.Column('user_name', sa.types.UnicodeText, primary_key=True),
             sa.Column('access_token', sa.types.UnicodeText),
             sa.Column('token_type', sa.types.UnicodeText),
-            sa.Column('refresh_token', sa.types.UnicodeText),
+            sa.Column('expires_at', sa.types.UnicodeText),
             sa.Column('expires_in', sa.types.UnicodeText)
         )
 
