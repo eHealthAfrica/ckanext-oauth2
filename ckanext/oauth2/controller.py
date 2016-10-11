@@ -25,7 +25,6 @@ import ckan.lib.helpers as helpers
 import ckan.lib.base as base
 
 from ckanext.oauth2.plugin import toolkit
-from pylons import config
 
 
 log = logging.getLogger(__name__)
@@ -56,13 +55,7 @@ class OAuth2Controller(base.BaseController):
                     error_description = type(e).__name__
 
             toolkit.response.status_int = 302
-            came_from = oauth2.get_came_from(toolkit.request.params.get('state'))
-            redirect_url = config.get('ckan.site_url')
-            
-            if came_from == constants.INITIAL_PAGE:
-                redirect_url = ''.join([redirect_url, '/'])
-            else:
-                redirect_url = ''.join([redirect_url, came_from])
-
+            redirect_url = oauth2.get_came_from(toolkit.request.params.get('state'))
+            redirect_url = '/' if redirect_url == constants.INITIAL_PAGE else redirect_url
             toolkit.response.location = redirect_url
             helpers.flash_error(error_description)
