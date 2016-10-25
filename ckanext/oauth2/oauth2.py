@@ -58,6 +58,7 @@ class OAuth2Helper(object):
         self.profile_api_mail_field = config.get('ckanext.oauth2.profile_api_mail_field', None)
         self.profile_api_groupmembership_field = config.get('ckanext.oauth2.profile_api_groupmembership_field', None)
         self.sysadmin_group_name = config.get('ckanext.oauth2.sysadmin_group_name', None)
+        self.allowed_domain = config.get('ckanext.oauth2.allowed_domain', None)
 
 
         # Init db
@@ -87,6 +88,16 @@ class OAuth2Helper(object):
                                   authorization_response=toolkit.request.url)
         return token
 
+    def _verify_domain(self, email):
+        if not self.allowed_domain:
+            return email
+        else:
+            email_domain = email.split('@', 1)[1]
+            if email_domain == self.allowed_domain:
+                return email
+            else:
+                raise ValueError('Sorry! Only employees from the States of Jersey government are able to log in.')
+
     def identify(self, token):
         oauth = OAuth2Session(self.client_id, token=token)
         profile_response = oauth.get(self.profile_api_url)
@@ -113,7 +124,7 @@ class OAuth2Helper(object):
 
             # Update mail
             if self.profile_api_mail_field and self.profile_api_mail_field in user_data:
-                user.email = user_data[self.profile_api_mail_field]
+                user.email = self._verify_domain(user_data[self.profile_api_mail_field])
 
              # Update sysadmin status
             if self.profile_api_groupmembership_field and self.profile_api_groupmembership_field in user_data:
