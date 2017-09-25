@@ -28,7 +28,6 @@ from ckan import plugins
 from ckan.common import session
 from ckan.plugins import toolkit
 from pylons import config
-from urlparse import urlparse
 
 log = logging.getLogger(__name__)
 
@@ -83,8 +82,11 @@ class OAuth2Plugin(plugins.SingletonPlugin):
                   controller='ckanext.oauth2.controller:OAuth2Controller',
                   action='callback')
 
+        m.connect('/oauth-login', controller='ckanext.oauth2.controller:OAuth2Controller',
+                  action='oauth_login')
         # # Redirect the user to the OAuth service register page
-        if register_url:
+        '''
+           if register_url:
             m.redirect('/user/register', register_url)
 
         # Redirect the user to the OAuth service reset page
@@ -94,12 +96,14 @@ class OAuth2Plugin(plugins.SingletonPlugin):
         # Redirect the user to the OAuth service reset page
         if edit_url:
             m.redirect('/user/edit/{user}', edit_url)
+        '''
+
 
         return m
 
     def identify(self):
         log.debug('identify')
-
+        print 'Identify '
         oauth2helper = oauth2.OAuth2Helper()
 
         authorization_header = config.get('ckanext.oauth2.authorization_header', 'Authorization')
@@ -115,6 +119,7 @@ class OAuth2Plugin(plugins.SingletonPlugin):
         environ = toolkit.request.environ
         apikey = toolkit.request.headers.get(authorization_header, '')
         user_name = None
+        print 'Identify blabla'
 
         # This API Key is not the one of CKAN, it's the one provided by the OAuth2 Service
         if apikey:
@@ -137,41 +142,6 @@ class OAuth2Plugin(plugins.SingletonPlugin):
         else:
             log.warn('The user is not currently logged...')
 
-    def _get_previous_page(self, default_page):
-        if 'came_from' not in toolkit.request.params:
-            came_from_url = toolkit.request.headers.get('Referer', default_page)
-        else:
-            came_from_url = toolkit.request.params.get('came_from', default_page)
-
-        came_from_url_parsed = urlparse(came_from_url)
-
-        # Avoid redirecting users to external hosts
-        if came_from_url_parsed.netloc != '' and came_from_url_parsed.netloc != toolkit.request.host:
-            came_from_url = default_page
-
-        # When a user is being logged and REFERER == HOME or LOGOUT_PAGE
-        # he/she must be redirected to the dashboard
-        pages = ['/', '/user/logged_out_redirect']
-        if came_from_url_parsed.path in pages:
-            came_from_url = default_page
-
-        return came_from_url
-
-    def login(self):
-        log.debug('login')
-
-        oauth2helper = oauth2.OAuth2Helper()
-
-        # Log in attemps are fired when the user is not logged in and they click
-        # on the log in button
-
-        # Get the page where the user was when the loggin attemp was fired
-        # When the user is not logged in, he/she should be redirected to the dashboard when
-        # the system cannot get the previous page
-        came_from_url = self._get_previous_page(constants.INITIAL_PAGE)
-
-        oauth2helper.challenge(came_from_url)
-
     def abort(self, status_code, detail, headers, comment):
         log.debug('abort')
 
@@ -180,7 +150,7 @@ class OAuth2Plugin(plugins.SingletonPlugin):
         # will try to reauthenticate the user generating a redirect loop:
         # (authenticate -> user not allowed -> auto log out -> authenticate -> ...)
         # If the user is not authenticated, the system should start the authentication process
-
+        print 'Aboort '
         if toolkit.c.user:  # USER IS AUTHENTICATED
             # When the user is logged in, he/she should be redirected to the main page when
             # the system cannot get the previous page
@@ -200,10 +170,10 @@ class OAuth2Plugin(plugins.SingletonPlugin):
     def get_auth_functions(self):
         # we need to prevent some actions being authorized.
         return {
-            'user_create': user_create,
-            'user_update': user_update,
-            'user_reset': user_reset,
-            'request_reset': request_reset
+            #'user_create': user_create,
+            #'user_update': user_update,
+            #'user_reset': user_reset,
+            #'request_reset': request_reset
         }
 
     def update_config(self, config):

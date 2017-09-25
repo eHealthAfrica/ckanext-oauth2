@@ -42,7 +42,7 @@ def init_db(model):
             sa.Column('expires_at', sa.types.UnicodeText),
             sa.Column('expires_in', sa.types.UnicodeText)
         )
-
+        print 'User name od baza: ', user_token_table
         # Create the table only if it does not exist
         user_token_table.create(checkfirst=True)
 
