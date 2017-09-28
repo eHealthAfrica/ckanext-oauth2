@@ -103,7 +103,6 @@ class OAuth2Plugin(plugins.SingletonPlugin):
 
     def identify(self):
         log.debug('identify')
-        print 'Identify '
         oauth2helper = oauth2.OAuth2Helper()
 
         authorization_header = config.get('ckanext.oauth2.authorization_header', 'Authorization')
@@ -119,7 +118,6 @@ class OAuth2Plugin(plugins.SingletonPlugin):
         environ = toolkit.request.environ
         apikey = toolkit.request.headers.get(authorization_header, '')
         user_name = None
-        print 'Identify blabla'
 
         # This API Key is not the one of CKAN, it's the one provided by the OAuth2 Service
         if apikey:
@@ -150,7 +148,6 @@ class OAuth2Plugin(plugins.SingletonPlugin):
         # will try to reauthenticate the user generating a redirect loop:
         # (authenticate -> user not allowed -> auto log out -> authenticate -> ...)
         # If the user is not authenticated, the system should start the authentication process
-        print 'Aboort '
         if toolkit.c.user:  # USER IS AUTHENTICATED
             # When the user is logged in, he/she should be redirected to the main page when
             # the system cannot get the previous page
