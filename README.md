@@ -1,7 +1,7 @@
-OAuth2 CKAN extension  [![Build Status](https://build.conwet.fi.upm.es/jenkins/buildStatus/icon?job=ckan_oauth2)](https://build.conwet.fi.upm.es/jenkins/job/ckan_oauth2/)
+OAuth2 CKAN extension   
 =====================
 
-The OAuth2 extension allows site visitors to login through an OAuth2 server.
+The OAuth2 extension allows site visitors to login through an OAuth2 server. It's been modified to works with standard ckan login and also with one of the Oauth2 servers.
 
 **Note**: This extension has been tested in CKAN 2.2 and 2.3. It may not work in other versions.
 
