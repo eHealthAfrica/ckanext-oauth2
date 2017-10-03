@@ -26,7 +26,7 @@ Example:
   <div class="form-actions">
     {% block login_button %}
       <button class="btn btn-primary" type="submit">{{ _('Login') }}</button>
-      <button>{% link_for _('Login with Google'), controller='ckanext.oauth2.controller:OAuth2Controller', action='oauth_login' %}</button>
+      <button class="btn btn-danger google-login">{% link_for _('Login with Google'), controller='ckanext.oauth2.controller:OAuth2Controller', action='oauth_login'%}</button>
     {% endblock %}
   </div>
 </form>
