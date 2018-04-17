@@ -198,5 +198,6 @@ class OAuth2Plugin(plugins.SingletonPlugin):
             'ckanext.oauth2.profile_api_fullname_field',
             'ckanext.oauth2.profile_api_mail_field',
             'ckanext.oauth2.profile_api_groupmembership_field',
-            'ckanext.oauth2.sysadmin_group_name'
+            'ckanext.oauth2.sysadmin_group_name',
+            'ckanext.oauth2.allowed_email_domains'  # new
         )
