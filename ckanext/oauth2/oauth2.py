@@ -153,6 +153,7 @@ class OAuth2Helper(object):
                 # the email does not belong to an allowed domain
                 raise ValueError(toolkit._('Email provider not supported!'))
 
+            # @FIXME: what if the existing user is not the same person?
             user = model.User.by_name(user_name)
 
             if user is None:
