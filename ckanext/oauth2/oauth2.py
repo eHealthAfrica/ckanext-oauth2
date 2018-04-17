@@ -28,7 +28,7 @@ import logging
 
 from base64 import b64encode, b64decode
 from ckan.plugins import toolkit
-from pylons import config
+from ckan.common import config
 from requests_oauthlib import OAuth2Session
 
 log = logging.getLogger(__name__)
@@ -46,19 +46,26 @@ class OAuth2Helper(object):
 
     def __init__(self):
 
-        self.authorization_endpoint = config.get('ckanext.oauth2.authorization_endpoint', None)
+        self.authorization_endpoint = config.get(
+            'ckanext.oauth2.authorization_endpoint', None)
         self.token_endpoint = config.get('ckanext.oauth2.token_endpoint', None)
-        self.profile_api_url = config.get('ckanext.oauth2.profile_api_url', None)
+        self.profile_api_url = config.get(
+            'ckanext.oauth2.profile_api_url', None)
         self.client_id = config.get('ckanext.oauth2.client_id', None)
         self.client_secret = config.get('ckanext.oauth2.client_secret', None)
         self.scope = config.get('ckanext.oauth2.scope', '').decode()
-        self.rememberer_name = config.get('ckanext.oauth2.rememberer_name', None)
-        self.profile_api_user_field = config.get('ckanext.oauth2.profile_api_user_field', None)
-        self.profile_api_fullname_field = config.get('ckanext.oauth2.profile_api_fullname_field', None)
-        self.profile_api_mail_field = config.get('ckanext.oauth2.profile_api_mail_field', None)
-        self.profile_api_groupmembership_field = config.get('ckanext.oauth2.profile_api_groupmembership_field', None)
-        self.sysadmin_group_name = config.get('ckanext.oauth2.sysadmin_group_name', None)
-
+        self.rememberer_name = config.get(
+            'ckanext.oauth2.rememberer_name', None)
+        self.profile_api_user_field = config.get(
+            'ckanext.oauth2.profile_api_user_field', None)
+        self.profile_api_fullname_field = config.get(
+            'ckanext.oauth2.profile_api_fullname_field', None)
+        self.profile_api_mail_field = config.get(
+            'ckanext.oauth2.profile_api_mail_field', None)
+        self.profile_api_groupmembership_field = config.get(
+            'ckanext.oauth2.profile_api_groupmembership_field', None)
+        self.sysadmin_group_name = config.get(
+            'ckanext.oauth2.sysadmin_group_name', None)
 
         # Init db
         db.init_db(model)
@@ -68,20 +75,56 @@ class OAuth2Helper(object):
             raise ValueError('authorization_endpoint, token_endpoint, client_id, client_secret, '
                              'profile_api_url and profile_api_user_field are required')
 
+    _allowed_email_domains = None
+
+    @property
+    def allowed_email_domains(self):
+        '''Retrieve list of allowed email domains from ckan config'''
+        if self._allowed_email_domains is not None:
+            return self._allowed_email_domains
+
+        allowed_domains = config.get(
+            'ckanext.oauth2.allowed_email_domains', '')
+        allowed_domains = [
+            d.strip().lower() for d in allowed_domains.split(' ')]
+
+        self._allowed_email_domains = allowed_domains or None
+        return self._allowed_email_domains
+
+    def verify_email(self, email):
+        '''Check if the user's email is allowed'''
+        if not self.allowed_email_domains:
+            # all email domains are allowed
+            return True
+
+        if not email:
+            # the oauth server did not return an  email for this user
+            return False
+
+        try:
+            email_domain = email.split('@')[1].strip().lower()
+            return email_domain in self.allowed_email_domains
+        except IndexError:
+            # invalid email address
+            return False
+
     def _redirect_uri(self, request):
         return ''.join([config.get('ckan.site_url'), constants.REDIRECT_URL])
 
     def challenge(self, came_from_url):
         # This function is called by the log in function when the user is not logged in
         state = generate_state(came_from_url)
-        oauth = OAuth2Session(self.client_id, redirect_uri=self._redirect_uri(toolkit.request), scope=self.scope, state=state)
+        oauth = OAuth2Session(self.client_id, redirect_uri=self._redirect_uri(
+            toolkit.request), scope=self.scope, state=state)
         auth_url, _ = oauth.authorization_url(self.authorization_endpoint)
         toolkit.response.status = 302
         toolkit.response.location = auth_url
-        log.debug('Challenge: Redirecting challenge to page {0}'.format(auth_url))
+        log.debug(
+            'Challenge: Redirecting challenge to page {0}'.format(auth_url))
 
     def get_token(self):
-        oauth = OAuth2Session(self.client_id, redirect_uri=self._redirect_uri(toolkit.request), scope=self.scope)
+        oauth = OAuth2Session(self.client_id, redirect_uri=self._redirect_uri(
+            toolkit.request), scope=self.scope)
         token = oauth.fetch_token(self.token_endpoint,
                                   client_secret=self.client_secret,
                                   authorization_response=toolkit.request.url)
@@ -101,6 +144,15 @@ class OAuth2Helper(object):
         else:
             user_data = profile_response.json()
             user_name = user_data[self.profile_api_user_field]
+
+            user_email = None
+            if self.profile_api_mail_field and self.profile_api_mail_field in user_data:
+                user_email = user_data[self.profile_api_mail_field]
+
+            if not self.verify_email(user_email):
+                # the email does not belong to an allowed domain
+                raise ValueError(toolkit._('Email provider not supported!'))
+
             user = model.User.by_name(user_name)
 
             if user is None:
@@ -112,8 +164,8 @@ class OAuth2Helper(object):
                 user.fullname = user_data[self.profile_api_fullname_field]
 
             # Update mail
-            if self.profile_api_mail_field and self.profile_api_mail_field in user_data:
-                user.email = user_data[self.profile_api_mail_field]
+            if user_email:
+                user.email = user_email
 
              # Update sysadmin status
             if self.profile_api_groupmembership_field and self.profile_api_groupmembership_field in user_data:
@@ -183,8 +235,10 @@ class OAuth2Helper(object):
     def refresh_token(self, user_name):
         token = self.get_stored_token(user_name)
         if token:
-            client = OAuth2Session(self.client_id, token=token, scope=self.scope)
-            token = client.refresh_token(self.token_endpoint, client_secret=self.client_secret, client_id=self.client_id)
+            client = OAuth2Session(
+                self.client_id, token=token, scope=self.scope)
+            token = client.refresh_token(
+                self.token_endpoint, client_secret=self.client_secret, client_id=self.client_id)
             self.update_token(user_name, token)
             log.info('Token for user %s has been updated properly' % user_name)
             return token
