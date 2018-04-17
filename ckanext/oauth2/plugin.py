@@ -25,9 +25,10 @@ import oauth2
 
 from functools import partial
 from ckan import plugins
-from ckan.common import session
+# instead of importing pylons config directly lets import it from ckan.common
+# which cleanly delegates to pylons or flask config depending on the context
+from ckan.common import session, config
 from ckan.plugins import toolkit
-from pylons import config
 
 log = logging.getLogger(__name__)
 
@@ -98,14 +99,14 @@ class OAuth2Plugin(plugins.SingletonPlugin):
             m.redirect('/user/edit/{user}', edit_url)
         '''
 
-
         return m
 
     def identify(self):
         log.debug('identify')
         oauth2helper = oauth2.OAuth2Helper()
 
-        authorization_header = config.get('ckanext.oauth2.authorization_header', 'Authorization')
+        authorization_header = config.get(
+            'ckanext.oauth2.authorization_header', 'Authorization')
 
         # Create session if it does not exist. Workaround to show flash messages
         session.save()
@@ -136,7 +137,8 @@ class OAuth2Plugin(plugins.SingletonPlugin):
         if user_name:
             toolkit.c.user = user_name
             toolkit.c.usertoken = oauth2helper.get_stored_token(user_name)
-            toolkit.c.usertoken_refresh = partial(_refresh_and_save_token, user_name)
+            toolkit.c.usertoken_refresh = partial(
+                _refresh_and_save_token, user_name)
         else:
             log.warn('The user is not currently logged...')
 
@@ -167,10 +169,10 @@ class OAuth2Plugin(plugins.SingletonPlugin):
     def get_auth_functions(self):
         # we need to prevent some actions being authorized.
         return {
-            #'user_create': user_create,
-            #'user_update': user_update,
-            #'user_reset': user_reset,
-            #'request_reset': request_reset
+            # 'user_create': user_create,
+            # 'user_update': user_update,
+            # 'user_reset': user_reset,
+            # 'request_reset': request_reset
         }
 
     def update_config(self, config):
