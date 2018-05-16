@@ -141,6 +141,7 @@ class OAuth2Plugin(plugins.SingletonPlugin):
                 _refresh_and_save_token, user_name)
         else:
             log.warn('The user is not currently logged...')
+            toolkit.c.user = None
 
     def abort(self, status_code, detail, headers, comment):
         log.debug('abort')
